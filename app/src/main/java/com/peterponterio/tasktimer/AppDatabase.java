@@ -10,7 +10,7 @@ import android.util.Log;
  *
  * Basic database class for the application
  *
- * the only class that should use this is AppProvider
+ * the only class that should use this is {@link AppProvider}
  */
 
 class AppDatabase extends SQLiteOpenHelper {
@@ -74,11 +74,11 @@ class AppDatabase extends SQLiteOpenHelper {
         /*
             replaced all the hardcoded references with the constants in the taskContract list
          */
-        sSQL = "CREATE TABLE " + TaskContract.TABLE_NAME + " ("
-                + TaskContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, "
-                + TaskContract.Columns.TASKS_NAME + " TEXT NOT NULL, "
-                + TaskContract.Columns.TASKS_DESCRIPTION + " TEXT, "
-                + TaskContract.Columns.TASKS_SORTORDER + " INTEGER);";
+        sSQL = "CREATE TABLE " + TasksContract.TABLE_NAME + " ("
+                + TasksContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, "
+                + TasksContract.Columns.TASKS_NAME + " TEXT NOT NULL, "
+                + TasksContract.Columns.TASKS_DESCRIPTION + " TEXT, "
+                + TasksContract.Columns.TASKS_SORTORDER + " INTEGER);";
 
         Log.d(TAG, sSQL);
         db.execSQL(sSQL); //executes the sql passed in by sSQL
