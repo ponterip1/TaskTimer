@@ -168,8 +168,7 @@ public class AppProvider extends ContentProvider {
         //return readable database object
         //were only querying the database so we dont need to call getWriteableDatabase
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-        return null;
+        return queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
     }
 
     @Nullable

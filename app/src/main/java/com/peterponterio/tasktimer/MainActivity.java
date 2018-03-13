@@ -1,16 +1,19 @@
 package com.peterponterio.tasktimer;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +22,46 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        /*
+             specify the columns we want to see in the query by creating a string array listing them
 
-        AppDatabase appDatabase = AppDatabase.getInstance(this);
-        final SQLiteDatabase db = appDatabase.getReadableDatabase();
+             we then get a reference to the devices content resolver and call its query method and because
+             were using the uri for our tasks table, the content resolver knows that it has to extract
+             the authority from the uri to work out which provider to use and then it passes the entire
+             uri onto our provider to run the query
+
+             get a cursor from the content resolver and once weve got it were going to loop through it
+            logging all the columns in the cursor, as long as the cursor isnt null
+         */
+        String[] projection = { TasksContract.Columns.TASKS_NAME, TasksContract.Columns.TASKS_DESCRIPTION};
+        ContentResolver contentResolver = getContentResolver();
+        Cursor cursor = contentResolver.query(TasksContract.CONTENT_URI,
+                projection,
+                null,
+                null,
+                TasksContract.Columns.TASKS_SORTORDER);
+
+        /*
+            instead of specifying which columns to log, the code just loops through all the columns in
+            the cursor and logs the name and value of each one, as well as getting the value of a column
+            using the getString method. we can also get the name of the column using the getColumnName
+            method
+         */
+        if(cursor != null){
+            Log.d(TAG, "onCreate: number of rows: " + cursor.getCount());
+            while (cursor.moveToNext()) {
+                for(int i=0; i<cursor.getColumnCount(); i++) {
+                    Log.d(TAG, "onCreate: " + cursor.getColumnName(i) + ": " + cursor.getString(i));
+                }
+                Log.d(TAG, "onCreate: ==================================");
+            }
+            cursor.close();
+        }
+
+//        AppDatabase appDatabase = AppDatabase.getInstance(this);
+//        final SQLiteDatabase db = appDatabase.getReadableDatabase();
+        
+        
 
 
 

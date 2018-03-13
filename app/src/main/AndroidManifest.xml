@@ -19,6 +19,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        
+        <provider
+            android:name="com.peterponterio.tasktimer.AppProvider"
+            android:authorities="com.peterponterio.tasktimer.provider"
+            android:exported="false"/>
+
     </application>
+
+
+
 
 </manifest>
