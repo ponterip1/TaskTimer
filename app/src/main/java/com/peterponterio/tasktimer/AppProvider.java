@@ -88,6 +88,14 @@ public class AppProvider extends ContentProvider {
     }
 
 
+
+
+
+
+
+
+
+
     @Override
     public boolean onCreate() {
         //get the instance of the database and store it in mOpenHelper.
@@ -95,6 +103,15 @@ public class AppProvider extends ContentProvider {
 
         return true;
     }
+
+
+
+
+
+
+
+
+
 
     @Nullable
     @Override
@@ -171,17 +188,118 @@ public class AppProvider extends ContentProvider {
         return queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
     }
 
+
+
+
+
+
+
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        //returns appropriate MIME type
+        switch (match) {
+            case TASKS:
+                return TasksContract.CONTENT_TYPE;
+
+            case TASKS_ID:
+                return TasksContract.CONTENT_ITEM_TYPE;
+
+//            case TIMINGS:
+//                return TimingsContract.Timings.CONTENT_TYPE;
+//
+//            case TIMINGS_ID:
+//                return TimingsContract.Timings.CONTENT_ITEM_TYPE;
+//
+//            case TASK_DURATIONS:
+//                return DurationsContract.TaskDurations.CONTENT_TYPE;
+//
+//            case TASK_DURATIONS_ID:
+//                return DurationsContract.TaskDurations.CONTENT_ITEM_TYPE;
+//
+//
+            default:
+                throw new IllegalArgumentException("unknown Uri: " + uri);
+        }
     }
+
+
+
+
+
+
+
+
+
 
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        return null;
+        //check the uri and get a result back from the uri matcher
+        Log.d(TAG, "Entering insert, called with uri: " + uri);
+        final int match = sUriMatcher.match(uri);
+        Log.d(TAG, "match is " + match);
+
+        final SQLiteDatabase db;
+
+        Uri returnUri;
+        long recordId;
+
+
+        switch (match) {
+            case TASKS:
+                /*
+                    the insertion is done by db's insert method and we just give it the name of the table
+                    to insert into, and also a list of values to insert. So whatever the ContentValues
+                    object is, we're just passing that onto the database insert method. And because we're
+                    just passing it onto the database insert method, we dont need to call any of it methods
+
+                    the db insert method will return the ID of the new row
+                 */
+                db = mOpenHelper.getWritableDatabase();
+                recordId = db.insert(TasksContract.TABLE_NAME, null, values);
+                if(recordId >=0) {
+                    //appending the id to the uri
+                    returnUri = TasksContract.buildTaskUri(recordId);
+                } else {
+                    throw new android.database.SQLException("Failed to insert into " + uri.toString());
+                }
+                break;
+
+            case TIMINGS:
+//                db = mOpenHelper.getWritableDatabase();
+//                recordId = db.insert(TimingsContract.Timings.buildTimingUri(recordId));
+//                if(recordId >=0) {
+//                    returnUri = TimingsContract.Timings.buildTimingUri(recordId);
+//                } else {
+//                    throw new android.database.SQLException("Failed to insert into " + uri.toString());
+//                }
+//                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown uri: " + uri);
+        }
+        Log.d(TAG, "Exiting insert, returning " + returnUri);
+        return returnUri;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
