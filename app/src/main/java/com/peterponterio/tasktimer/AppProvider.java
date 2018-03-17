@@ -185,7 +185,22 @@ public class AppProvider extends ContentProvider {
         //return readable database object
         //were only querying the database so we dont need to call getWriteableDatabase
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        return queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+//        return queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+
+        /*
+            update code to return cursor
+
+            made a reference to the cursor and used the setNotificationUri method to send a notification
+            so that. Calling this method results in any listeners attached to the contentResolver being
+            notified of changes to the data for the uri that we specify. So our uri represents the tasks
+            table rather than a specific record. So that means that any changes to the table can be
+            notified
+         */
+        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        Log.d(TAG, "query: rows in returned cursor = " + cursor.getCount()); // TODO remove this line
+
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
 
@@ -280,6 +295,20 @@ public class AppProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown uri: " + uri);
         }
+
+
+        //trigger notifications
+        if (recordId >= 0) {
+            //something was inserted
+            Log.d(TAG, "insert: Setting notifyChanged with " + uri);
+            getContext().getContentResolver().notifyChange(uri, null);
+        } else {
+            Log.d(TAG, "insert: nothing inserted");
+        }
+
+
+
+
         Log.d(TAG, "Exiting insert, returning " + returnUri);
         return returnUri;
     }
@@ -355,8 +384,20 @@ public class AppProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown uri: " + uri);
         }
-        Log.d(TAG, "Exiting update, returning " + count);
 
+
+        //trigger notifications
+        if(count > 0) {
+            //somethign was deleted
+            Log.d(TAG, "delete: Setting notifyChange with " + uri);
+            getContext().getContentResolver().notifyChange(uri, null);
+        } else {
+            Log.d(TAG, "delete: nothing deleted");
+        }
+
+
+
+        Log.d(TAG, "Exiting update, returning " + count);
         return count;
     }
 
@@ -441,8 +482,19 @@ public class AppProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown uri: " + uri);
         }
-        Log.d(TAG, "Exiting update, returning " + count);
 
+
+        //trigger notifications
+        if(count > 0) {
+            //somethign was updated
+            Log.d(TAG, "update: Setting notifyChange with " + uri);
+            getContext().getContentResolver().notifyChange(uri, null);
+        } else {
+            Log.d(TAG, "update: nothing deleted");
+        }
+
+
+        Log.d(TAG, "Exiting update, returning " + count);
         return count;
     }
 
