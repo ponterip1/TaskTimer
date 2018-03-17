@@ -57,12 +57,8 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
         //if there wasnt any records, any data, or the cursor was null
         if((mCursor == null) || (mCursor.getCount() == 0)) {
             Log.d(TAG, "onBindViewHolder: providing instructions");
-            holder.name.setText("Instructions");
-            holder.description.setText("Use the add button (+) in the toolbar above to create new tasks. " +
-                    "\n\nTasks with lower sort orders will be placed higher up in the list." +
-                    "Tasks with the same sort order will be sorted alphabetically." +
-                    "\n\nTapping a task will start the timer for that task (and will stop the timer for any previous task that was being timed)." +
-                    "\n\nEach task has Edit and Delete buttons if you want to change the details or remove the task.");
+            holder.name.setText(R.string.instructions_heading);
+            holder.description.setText(R.string.instructions);
             holder.editButton.setVisibility(View.GONE);
             holder.deleteButton.setVisibility(View.GONE);
         } else { //if the cursor isnt null, display the data
@@ -89,10 +85,65 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
 
 
 
+    /*
+        recyclerView uses this so it knows how many items there are to display. If there are no items,
+        we will be sending back a view that displays the instructions. So in this case we dont want to
+         tell the recyclerView that there are no records. we'll always return atleast 1
+
+     */
     @Override
     public int getItemCount() {
-        return 0;
+        Log.d(TAG, "getItemCount: starts");
+
+        if((mCursor == null) || (mCursor.getCount() ==0)) {
+            return 1; //we return 1 because we populate a single ViewHolder with instructions
+        } else {
+            return mCursor.getCount();
+        }
     }
+
+
+
+
+
+
+
+    /**
+     * Swap in a new Cursor, returning the old Cursor.
+     * The returned old Cursor is <em>not</em> closed.
+     *
+     * @param newCursor The new cursor to be used
+     * @return Returns the previously set Cursor, or null if there wasnt one.
+     * If the given new Cursor is the same instance as the previously set
+     * Cursor, null is also returned
+     *
+     *
+     * Should be called whenever the cursor that the adapter is using is changed. We'll see it being
+     * called in main activity fragment when we provide a valid cursor for the first time and again
+     * when the loader is reset.
+     *
+     * The method returns the previous cursor, which can be useful if the owner of that cursor needs
+     * to close it. We dont have to worry about that because our cursor loader class takes care of it.
+     */
+    Cursor swapCursor(Cursor newCursor) {
+        if (newCursor == mCursor) {
+            return null;
+        }
+
+        final Cursor oldCursor = mCursor;
+        mCursor = newCursor;
+        if(newCursor != null) {
+            //notify the observers(such as a recyclerView) about the new cursor
+            notifyDataSetChanged();
+        } else {
+            //notify the observers about the lack of a data set
+            notifyItemRangeRemoved(0, getItemCount());
+        }
+        return oldCursor;
+
+    }
+
+
 
 
 
