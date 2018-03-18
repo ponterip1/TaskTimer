@@ -96,8 +96,14 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        //no data yet, initializing with null which will cause it to return a view with instructions
-        mAdapter = new CursorRecyclerViewAdapter(null); 
+        /*
+            no data yet, initializing with null which will cause it to return a view with instructions
+
+            Second parameter is going to be the listener that we've added to the constructor for the
+            CursorRecyclerViewAdapter. We can just pass in the reference to our fragments activity using
+            the getActivity method, but we also have to cast it to the correct type as well.
+         */
+        mAdapter = new CursorRecyclerViewAdapter(null, (CursorRecyclerViewAdapter.OnTaskClickListener) getActivity());
         recyclerView.setAdapter(mAdapter);
 
         Log.d(TAG, "onCreateView: returning");
@@ -144,7 +150,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
          */
         String[] projection = {TasksContract.Columns._ID, TasksContract.Columns.TASKS_NAME,
                                 TasksContract.Columns.TASKS_DESCRIPTION, TasksContract.Columns.TASKS_SORTORDER};
-        String sortOrder = TasksContract.Columns.TASKS_SORTORDER + "," + TasksContract.Columns.TASKS_NAME;
+
+        // <order by> Tasks.SortOrder, Tasks.Name COLLATE NOCASE
+        String sortOrder = TasksContract.Columns.TASKS_SORTORDER + "," + TasksContract.Columns.TASKS_NAME + " COLLATE NOCASE";
 
         switch(id) {
             case LOADER_ID:

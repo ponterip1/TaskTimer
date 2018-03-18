@@ -21,11 +21,39 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
     private static final String TAG = "CursorRecyclerViewAdapt";
 
     private Cursor mCursor;
+    private OnTaskClickListener mListener;
 
-    public CursorRecyclerViewAdapter(Cursor cursor) {
+
+
+
+
+
+    /*
+        used to respond to tasks being clicked in the recyclerView list
+     */
+    interface OnTaskClickListener {
+        void onEditClick(Task task);
+        void onDeleteClick(Task task);
+    }
+
+
+
+
+
+
+
+
+    public CursorRecyclerViewAdapter(Cursor cursor, OnTaskClickListener listener) {
         Log.d(TAG, "CursorRecyclerViewAdapter: Constructor called");
         mCursor = cursor;
+        mListener = listener;
     }
+
+
+
+
+
+
 
 
     /*
@@ -36,10 +64,20 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "onCreateViewHolder: new view requested");
+//        Log.d(TAG, "onCreateViewHolder: new view requested");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_list_items, parent, false);
         return new TaskViewHolder(view);
     }
+
+
+
+
+
+
+
+
+
+    
 
 
 
@@ -50,7 +88,7 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
      */
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder: starts");
+//        Log.d(TAG, "onBindViewHolder: starts");
 
 
 
@@ -62,20 +100,71 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
             holder.editButton.setVisibility(View.GONE);
             holder.deleteButton.setVisibility(View.GONE);
         } else { //if the cursor isnt null, display the data
-            if(!mCursor.moveToPosition(position)) {
+            if (!mCursor.moveToPosition(position)) {
                 throw new IllegalStateException("Couldnt move cursor to position " + position);
             }
+
+
+            /*
+                Created the task that has been clicked on effectively. We can use the task object in
+                our onClickListener to log the task name
+
+             */
+            final Task task = new Task(mCursor.getLong(mCursor.getColumnIndex(TasksContract.Columns._ID)),
+                    mCursor.getString(mCursor.getColumnIndex(TasksContract.Columns.TASKS_NAME)),
+                    mCursor.getString(mCursor.getColumnIndex(TasksContract.Columns.TASKS_DESCRIPTION)),
+                    mCursor.getInt(mCursor.getColumnIndex(TasksContract.Columns.TASKS_SORTORDER)));
+
+
+
+
             /*
                 as long as we've got a valid cursor that contains atleast one row, the code retrieves
                 the value from the cursor and uses them to set the text in the textView widgets
              */
-            holder.name.setText(mCursor.getString(mCursor.getColumnIndex(TasksContract.Columns.TASKS_NAME)));
-            holder.description.setText(mCursor.getString(mCursor.getColumnIndex(TasksContract.Columns.TASKS_DESCRIPTION)));
+            holder.name.setText(task.getName());
+            holder.description.setText(task.getDescription());
             holder.editButton.setVisibility(View.VISIBLE); // TODO add onClick Listener
             holder.deleteButton.setVisibility(View.VISIBLE); //TODO add onClick Listener
+
+
+            /*
+                onClickListener will call the appropriate methods in our mListener object when one of
+                the buttons is clicked. The button calls back to the cursorRecyclerViewAdapter class
+                when the button is tapped and this class will call back the activity or the fragment
+                passing it to the task that needs to be edited or deleted. So in that way, the activity
+                or fragment can take care of editing a task or deleting it. Editing and Deleting will
+                be initiated by MainActivity and not a fragment
+             */
+            View.OnClickListener buttonListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+//                    Log.d(TAG, "onClick: starts");
+                    switch (view.getId()) {
+                        case R.id.tli_edit:
+                            if(mListener != null) {
+                                mListener.onEditClick(task);
+                            }
+                            break;
+                        case R.id.tli_delete:
+                            if(mListener != null){
+                                mListener.onDeleteClick(task);
+                            }
+                            break;
+                        default:
+                            Log.d(TAG, "onClick: found unexpected button id");
+                    }
+
+//                    Log.d(TAG, "onClick: button with id " + view.getId() + " clicked");
+//                    Log.d(TAG, "onClick: task name is " + task.getName());
+                }
+            };
+
+            //setting onclick listener to buttons
+            holder.editButton.setOnClickListener(buttonListener);
+            holder.deleteButton.setOnClickListener(buttonListener);
+
         }
-
-
 
     }
 
@@ -93,7 +182,7 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
      */
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: starts");
+//        Log.d(TAG, "getItemCount: starts");
 
         if((mCursor == null) || (mCursor.getCount() ==0)) {
             return 1; //we return 1 because we populate a single ViewHolder with instructions
@@ -161,7 +250,7 @@ class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewA
 
         public TaskViewHolder(View itemView) {
             super(itemView);
-            Log.d(TAG, "TaskViewHolder: starts");
+//            Log.d(TAG, "TaskViewHolder: starts");
             this.name = (TextView) itemView.findViewById(R.id.tli_name);
             this.description = (TextView) itemView.findViewById(R.id.tli_description);
             this.editButton = (ImageButton) itemView.findViewById(R.id.tli_edit);

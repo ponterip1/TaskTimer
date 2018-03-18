@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener {
     private static final String TAG = "MainActivity";
 
 
@@ -62,13 +62,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
+
+    //interface methods
+    @Override
+    public void onEditClick(Task task) {
+        taskEditRequest(task);
+    }
+
+
+    //interface methods
+    @Override
+    public void onDeleteClick(Task task) {
+
+    }
+
+
+
+
+
+
+
+
+
+
     /*
-        start of by seeing if the app should be in two pane mode. If the apps running on a phone in
-        portrait mode, we start the AddEditActivity using an intent. If our taskEditRequest method's
-        called with a task argument that isnt null, then that indicates that an existing task is to be
-        edited. but if the task is null, then we're adding a new task. So if we have a task to edit,
-         we add it to the intent by calling the putExtra method
-     */
+            start of by seeing if the app should be in two pane mode. If the apps running on a phone in
+            portrait mode, we start the AddEditActivity using an intent. If our taskEditRequest method's
+            called with a task argument that isnt null, then that indicates that an existing task is to be
+            edited. but if the task is null, then we're adding a new task. So if we have a task to edit,
+             we add it to the intent by calling the putExtra method
+         */
     private void taskEditRequest(Task task) {
         Log.d(TAG, "taskEditRequest: starts");
 
