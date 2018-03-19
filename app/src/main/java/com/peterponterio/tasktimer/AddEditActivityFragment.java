@@ -60,19 +60,14 @@ public class AddEditActivityFragment extends Fragment {
 
 
 
-        /*
-            when we pass a task object in the intent, its passed as a bundle. getExtras() is getting
-            the extra arguments that were included in the intent that started the activity that the
-            fragment is associated with. When mainActivity wants to add a new task, it doesnt provide
-            any extras to the intent, so in this case arguments will be null. Even if there are arguments,
-            theres no guarantee that they contain a task.
 
-            We use the getSerializable method and pass the task.class.getSimpleName() as the key. If that
-            doesnt return null, we have a task to edit. We can then initialize the contents of our editText
-            widgets with the task details. If it was null, it means we didnt get a task to edit, so we're
-            just setting mMode to ADD
+
+
+        /*
+            Retrieving the bundle from the arguments that were set before the frament was added using
+            the setArguments method in MainActivitys taskEditRequest method
          */
-        Bundle arguments = getActivity().getIntent().getExtras();
+        Bundle arguments = getArguments();
 
 
 
@@ -159,7 +154,7 @@ public class AddEditActivityFragment extends Fragment {
                             values.put(TasksContract.Columns.TASKS_NAME, mNameTextView.getText().toString());
                         }
                         if(!mDescriptionTextView.getText().toString().equals(task.getDescription())) {
-                            values.put(TasksContract.Columns.TASKS_DESCRIPTION, mNameTextView.getText().toString());
+                            values.put(TasksContract.Columns.TASKS_DESCRIPTION, mDescriptionTextView.getText().toString());
                         }
                         if(so != task.getSortOrder()) {
                             values.put(TasksContract.Columns.TASKS_SORTORDER, so);
