@@ -1,7 +1,9 @@
 package com.peterponterio.tasktimer;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -33,9 +35,106 @@ public class AddEditActivityFragment extends Fragment {
     private Button mSaveButton;
 
 
+
+
+
+    /*
+        The fragment signals to the activity that its done its job and can be removed. We need to use
+        a callback. we use a callback whenever we want a fragment to communicate with the activity that
+        its in. Start by defining an interface to ensure that any activity using our AddEditActivity
+        Fragment does have a callback function. We'll also need a field to store the listener that we'll
+        be calling back.
+
+        whenever we need to inform the activity that a save button was clicked, we call the onSaveClicked
+        method that it'll have to implement.
+
+        Normally the constructor is an ideal place to set up a listener when you're creating an instance
+        of a class thats going to call back your activity. Its not a good idea to do that here though, because
+        for one, the fragment can get a reference to its activity whenever it wants by calling the getActivity
+        method, but for two, the fragment shouldnt have a constructor that takes parameters. Every fragment
+        must have an empty constructor so it can be instantiated when restoring its activity's state.
+
+        We're going to set the listener in the onAttach method
+     */
+    private OnSaveClicked mSaveListener = null;
+    interface OnSaveClicked {
+        void onSaveClicked();
+    }
+
+
+
     public AddEditActivityFragment() {
         Log.d(TAG, "AddEditActivityFragment: constructor called");
     }
+
+
+
+
+
+
+
+
+
+
+
+    /*
+        we're going to use getActivity to get a reference to the fragments activity and then cast
+        it to be an OnSaveClicked object
+     */
+    @Override
+    public void onAttach(Context context) {
+        Log.d(TAG, "onAttach: starts");
+        super.onAttach(context);
+
+
+        //Activities containing this fragment must implement its callbacks
+        Activity activity = getActivity();
+        //instanceof will be true if the activity is an instance of OnSaveClicked
+        if(!(activity instanceof OnSaveClicked)) {
+            throw new ClassCastException(activity.getClass().getSimpleName()
+                + " must implement AddEditActivityFragment.OnSaveClicked interface");
+        }
+
+        //should now have a reference to an object that has an onSaveClicked method for the fragment to call
+        mSaveListener = (OnSaveClicked) activity;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+        by setting mSaveListener to null, the code wont try to call the onSaveClick method after the
+        fragment is detached from the activity
+     */
+    @Override
+    public void onDetach() {
+        Log.d(TAG, "onDetach: starts");
+        super.onDetach();
+        mSaveListener = null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
 
 
     //Fragments onCreateView method returns the view it inflates
@@ -104,6 +203,12 @@ public class AddEditActivityFragment extends Fragment {
         }
 
 
+
+
+
+
+
+        //save button on click listener
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -175,6 +280,18 @@ public class AddEditActivityFragment extends Fragment {
                         break;
                 }
                 Log.d(TAG, "onClick: Done editing");
+
+
+                /*
+                    null check so the app wont crash if theres no activity associated with the fragment
+
+                    We've got a way for the fragment to nofity its activity that the Save button was
+                    clicked.
+                 */
+                if(mSaveListener != null) {
+                    mSaveListener.onSaveClicked();
+                }
+
             }
         });
         Log.d(TAG, "onCreateView: Exiting...");
@@ -184,3 +301,4 @@ public class AddEditActivityFragment extends Fragment {
 
     }
 }
+

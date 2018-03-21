@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-public class AddEditActivity extends AppCompatActivity {
+public class AddEditActivity extends AppCompatActivity implements AddEditActivityFragment.OnSaveClicked {
     private static final String TAG = "AddEditActivity";
 
     @Override
@@ -46,4 +46,22 @@ public class AddEditActivity extends AppCompatActivity {
 
     }
 
+    /*
+        implement the onSaveClicked interface
+
+        When we edit a task in portrait mode, the addEditActivity was started and that loads the fragment,
+        and when the save button is clicked, the fragment calls addEditActivity's onSaveClicked method and
+        addEditActivity then finishes
+    */
+
+    @Override
+    public void onSaveClicked() {
+        /*
+            when you want an activity to finish, you just call the finish method
+         */
+        finish();
+
+    }
 }
+
+

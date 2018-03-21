@@ -3,16 +3,17 @@ package com.peterponterio.tasktimer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 
 
-public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener {
+public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener,
+                AddEditActivityFragment.OnSaveClicked {
     private static final String TAG = "MainActivity";
 
 
@@ -42,6 +43,51 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
             mTwoPane = true;
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+        get the activity to implement the interface and respond appropriately when their onSaveClicked method
+        is called
+    */
+    @Override
+    public void onSaveClicked() {
+        /*
+            to remove the fragment we have to pass a fragment object to the remove method
+
+            mainActivity removes the fragment when the save button is tapped(closes the edit view)
+         */
+        Log.d(TAG, "onSaveClicked: starts");
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.task_details_container); //finds fragment
+
+        /*
+            if we find the fragment, we use a fragmentManager to being a fragmentTransaction. We then
+            remove the fragment abd we commit the change when we're done
+         */
+        if(fragment != null) {
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            fragmentTransaction.remove(fragment);
+//            fragmentTransaction.commit();
+            //same code as above (chaining methods together)
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        }
+    }
+
+
+
+
+
+
 
 
 
@@ -106,6 +152,10 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
 
 
+
+
+
+
     /*
         start of by seeing if the app should be in two pane mode. If the apps running on a phone in
         portrait mode, we start the AddEditActivity using an intent. If our taskEditRequest method's
@@ -141,10 +191,13 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
             fragment.setArguments(arguments); //added task to bundle and added bundle to fragments arguments
 
 
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.task_details_container, fragment);
-            fragmentTransaction.commit();
+            //v4 import so older API's can use
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            fragmentTransaction.replace(R.id.task_details_container, fragment);
+//            fragmentTransaction.commit();
+            // same code as above (chaining methods together)
+            getSupportFragmentManager().beginTransaction().replace(R.id.task_details_container, fragment).commit();
 
         } else {
             Log.d(TAG, "taskEditRequest: in single-pane mode (phone");
