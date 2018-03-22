@@ -13,7 +13,7 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener,
-                AddEditActivityFragment.OnSaveClicked {
+        AddEditActivityFragment.OnSaveClicked, AppDialog.DialogEvents {
     private static final String TAG = "MainActivity";
 
 
@@ -22,7 +22,12 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
     private boolean mTwoPane = false;
 
 
-    private static final String ADD_EDIT_FRAGEMENT = "AddEditFragment";
+    private static final String ADD_EDIT_FRAGMENT = "AddEditFragment";
+
+    public static final int DELETE_DIALOG_ID = 1;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
 
     /*
+        interface method (AddEditActivityFragment)
+
         get the activity to implement the interface and respond appropriately when their onSaveClicked method
         is called
     */
@@ -130,17 +137,36 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
 
 
-    //interface methods
+    //interface methods (CursorRecyclerViewAdapter)
     @Override
     public void onEditClick(Task task) {
         taskEditRequest(task);
     }
 
 
-    //interface methods
+    //interface methods (CursorRecyclerViewAdapter)
     @Override
     public void onDeleteClick(Task task) {
-        getContentResolver().delete(TasksContract.buildTaskUri(task.getId()), null, null);
+        Log.d(TAG, "onDeleteClick: starts");
+
+
+        /*
+            creating a new AppDialog and added our DIALOG_ID and DELETE_DIALOG_ID as well as the caption
+            in the DIALOG_POSITIVE_RID key to the bundle.
+
+            shows dialog to request confirmation before deleting a task
+         */
+        AppDialog dialog = new AppDialog();
+        Bundle args = new Bundle();
+        args.putInt(AppDialog.DIALOG_ID, DELETE_DIALOG_ID);
+        args.putString(AppDialog.DIALOG_MESSAGE, getString(R.string.deldiag_message, task.getId(), task.getName()));
+        args.putInt(AppDialog.DIALOG_POSITIVE_RID, R.string.deldiag_positive_caption);
+
+        //puts task id in bundle
+        args.putLong("TaskId", task.getId());
+
+        dialog.setArguments(args);
+        dialog.show(getFragmentManager(), null);
     }
 
 
@@ -212,6 +238,44 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
             }
         }
 
+
+    }
+
+
+
+
+
+
+
+
+
+    //interface method (AppDialog)
+    @Override
+    public void onPositiveDialogResult(int dialogID, Bundle args) {
+        Log.d(TAG, "onPositiveDialogResult: called");
+
+        //retrieving taskId from bundle
+        Long taskId = args.getLong("TaskId");
+
+        getContentResolver().delete(TasksContract.buildTaskUri(taskId), null, null);
+    }
+
+
+
+    //interface method (AppDialog)
+    @Override
+    public void onNegativeDialogResults(int dialogID, Bundle args) {
+        Log.d(TAG, "onNegativeDialogResults: called");
+
+    }
+
+
+
+
+    //interface method (AppDialog)
+    @Override
+    public void onDialogCancelled(int dialogID) {
+        Log.d(TAG, "onDialogCancelled: called");
 
     }
 }
