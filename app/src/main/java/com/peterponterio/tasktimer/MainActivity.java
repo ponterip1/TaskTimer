@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
     private boolean mTwoPane = false;
 
 
-    private static final String ADD_EDIT_FRAGMENT = "AddEditFragment";
 
-    public static final int DELETE_DIALOG_ID = 1;
+    public static final int DIALOG_ID_DELETE = 1;
+    public static final int DIALOG_ID_CANCEL_EDIT = 2;
 
 
 
@@ -108,6 +108,12 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
         return true;
     }
 
+
+
+
+
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -158,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
          */
         AppDialog dialog = new AppDialog();
         Bundle args = new Bundle();
-        args.putInt(AppDialog.DIALOG_ID, DELETE_DIALOG_ID);
+        args.putInt(AppDialog.DIALOG_ID, DIALOG_ID_DELETE);
         args.putString(AppDialog.DIALOG_MESSAGE, getString(R.string.deldiag_message, task.getId(), task.getName()));
         args.putInt(AppDialog.DIALOG_POSITIVE_RID, R.string.deldiag_positive_caption);
 
@@ -251,21 +257,39 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
     //interface method (AppDialog)
     @Override
-    public void onPositiveDialogResult(int dialogID, Bundle args) {
+    public void onPositiveDialogResult(int dialogId, Bundle args) {
         Log.d(TAG, "onPositiveDialogResult: called");
 
-        //retrieving taskId from bundle
-        Long taskId = args.getLong("TaskId");
-
-        getContentResolver().delete(TasksContract.buildTaskUri(taskId), null, null);
+        switch (dialogId) {
+            case DIALOG_ID_DELETE: //user clicks yes to confirm delete task
+                //retrieving taskId from bundle
+                Long taskId = args.getLong("TaskId");
+                if(BuildConfig.DEBUG && taskId ==0) throw new AssertionError("Task ID is zero");
+                getContentResolver().delete(TasksContract.buildTaskUri(taskId), null, null);
+                break;
+            case DIALOG_ID_CANCEL_EDIT:
+                //user clicks continue editing when back button is pressed while editing task (doesnt abandon the edit)
+                //no action required
+                break;
+        }
     }
 
 
 
     //interface method (AppDialog)
     @Override
-    public void onNegativeDialogResults(int dialogID, Bundle args) {
+    public void onNegativeDialogResults(int dialogId, Bundle args) {
         Log.d(TAG, "onNegativeDialogResults: called");
+
+        switch(dialogId) {
+            case DIALOG_ID_DELETE: //user clicks no to cancel delete task
+                //no action required
+                break;
+            case DIALOG_ID_CANCEL_EDIT:
+                //user clicks abandon changes when back button is pressed while editing task
+                finish(); //finishes the activity
+                break;
+        }
 
     }
 
@@ -277,5 +301,43 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
     public void onDialogCancelled(int dialogID) {
         Log.d(TAG, "onDialogCancelled: called");
 
+    }
+    
+    
+    
+    
+
+
+    //when androids back button (white triangle button at bottom) is pressed (not the one at the top of the app)
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed: called");
+
+        /*
+            to find out if we're showing the fragment, we use a call to findFragmentById and we're getting
+            a reference to the fragment. If thats null, then that means we're not displaying the fragment
+            and therefore we're not in two pane mode, which means we're just showing a list of tasks on the
+            screen and we can safely allow the user to close down the app. we dont need to pop up a notification.
+            So if theres no fragment or the fragment says we can close it, then we call the super.onBackPress(),
+            which is the normal code to close down the app
+
+            if we are showing the fragment(edit screen) we ask the user for confirmation with a dialog
+         */
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        AddEditActivityFragment fragment = (AddEditActivityFragment) fragmentManager.findFragmentById(R.id.task_details_container);
+        if((fragment == null) || fragment.canClose()) {
+            super.onBackPressed();
+        } else {
+            //show dialog to get confirmation to quit editing
+            AppDialog dialog = new AppDialog();
+            Bundle args = new Bundle();
+            args.putInt(AppDialog.DIALOG_ID, DIALOG_ID_CANCEL_EDIT);
+            args.putString(AppDialog.DIALOG_MESSAGE, getString(R.string.cancelEditDiag_message));
+            args.putInt(AppDialog.DIALOG_POSITIVE_RID, R.string.cancelEditDiag_positive_caption);
+            args.putInt(AppDialog.DIALOG_NEGATIVE_RID, R.string.cancelEditDiag_negative_caption);
+
+            dialog.setArguments(args);
+            dialog.show(getFragmentManager(), null);
+        }
     }
 }

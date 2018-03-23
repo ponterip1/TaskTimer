@@ -63,9 +63,31 @@ public class AddEditActivityFragment extends Fragment {
 
 
 
+
+
+
+
+
+
+
     public AddEditActivityFragment() {
         Log.d(TAG, "AddEditActivityFragment: constructor called");
     }
+
+
+
+
+
+    /*
+        return true if there is no unsaved data in the fragment, otherwise return false
+    */
+    public boolean canClose() {
+        return false;
+    }
+
+
+
+
 
 
 

@@ -215,24 +215,6 @@ public class AppDialog extends DialogFragment {
             mDialogEvents.onDialogCancelled(dialogId);
         }
     }
-
-
-
-
-
-
-
-
-
-
-    
-
-    //only overridden to add log message
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        Log.d(TAG, "onDismiss: called");
-        super.onDismiss(dialog);
-    }
 }
 
 
