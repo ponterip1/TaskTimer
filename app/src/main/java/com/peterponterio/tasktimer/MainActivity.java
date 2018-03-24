@@ -3,6 +3,7 @@ package com.peterponterio.tasktimer;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -190,8 +191,36 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
         builder.setIcon(R.mipmap.ic_launcher);
         builder.setView(messageView);
 
+
+
+        //onClick listener set to button inside dialog, clicking button dismisses it
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(mDialog != null && mDialog.isShowing()) {
+                    mDialog.dismiss();
+                }
+            }
+        });
+
+
         mDialog = builder.create();
         mDialog.setCanceledOnTouchOutside(true);
+
+
+
+//        //onClick listener set to dialog View, clicking dialog dismisses it. (not good to use when there are links in dialog. ex: email/web)
+//        messageView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(mDialog != null && mDialog.isShowing()) {
+//                    mDialog.dismiss();
+//                }
+//            }
+//        });
+
+
+
 
 
         TextView tv = (TextView) messageView.findViewById(R.id.about_version);
