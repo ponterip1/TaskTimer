@@ -1,6 +1,8 @@
 package com.peterponterio.tasktimer;
 
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +12,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener,
@@ -25,6 +29,14 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
     public static final int DIALOG_ID_DELETE = 1;
     public static final int DIALOG_ID_CANCEL_EDIT = 2;
+
+
+    /*
+        module scope because we need to dismiss it in onStop method, when orientation
+        changes, to avoid memory leaks
+     */
+    private AlertDialog mDialog = null;
+
 
 
 
@@ -131,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
             case R.id.menumain_settings:
                 break;
             case R.id.menumain_showAbout:
+                showAboutDialog();
                 break;
             case R.id.menumain_generate:
                 break;
@@ -138,6 +151,59 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+
+
+
+
+    @SuppressLint("SetTextI18n") //suppress warnings when you're absolutely sure you don't need them
+    public void showAboutDialog() {
+        /*
+            when creating a custom dialog, you have to inflate the XML. That creates the view that the
+            dialog is gonna be displaying. Dialogs arent part of the underlying activity, the display
+            on top of it and are completely separate. So theres no rootView the we can use, which is why
+            the root parameter in the .inflate method is set to null
+
+            Next we're creating an AlertDialog.Builder object, and thats
+            going to do all the work of building the dialog for us.
+
+            Then we set the title and icon for the dialog, calling the builder.setTitle and builder.setIcon
+            methods.
+
+            The setView method uses our InflatedView (messageView) as the dialogs contents. After that
+            we call the builder.create method to create the dialog, and we store a reference to it in
+            our mDialog field.
+
+            Dialogs normally cancel when you type away from them on the screen, thats the default behavior.
+            If you want to prevent the dialog from being cancelled when the user types away from it, paA
+            the setCanceledOnTouchOutside() method a value of false.
+
+            Then we get a reference to the about_version TextView so that we can display the version
+            information. Then finally, we're showing the dialog with the show() method
+         */
+        @SuppressLint("InflateParams") View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setIcon(R.mipmap.ic_launcher);
+        builder.setView(messageView);
+
+        mDialog = builder.create();
+        mDialog.setCanceledOnTouchOutside(true);
+
+
+        TextView tv = (TextView) messageView.findViewById(R.id.about_version);
+        tv.setText("v" + BuildConfig.VERSION_NAME); //no need to use a string resource for one letter
+
+        mDialog.show();
+    }
+
+
+
+
+
 
 
 
@@ -338,6 +404,24 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
             dialog.setArguments(args);
             dialog.show(getFragmentManager(), null);
+        }
+    }
+
+
+
+
+
+
+
+    /*
+        dismisses the dialog. This is why mDialog had to be a field, we needed a reference to the dialog
+        so we could dismiss it in onStop
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
         }
     }
 }
