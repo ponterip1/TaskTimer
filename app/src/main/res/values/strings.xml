@@ -23,4 +23,8 @@
     <string name="cancelEditDiag_message">You have unsaved changes. Do you want to abandon your changes, or continue editing?</string>
     <string name="cancelEditDiag_positive_caption">Continue editing</string>
     <string name="cancelEditDiag_negative_caption">Abandon changes</string>
+    <string name="about_copyright">Copyright \u00a9 2018</string>
+    <string name="about_weblink">Instructions available at www.peterponterio.com</string>
+    <string name="about_email">For support email ponterip1@gmail.com</string>
+    <string name="about_credits">Icon derived from <b>analog clock</b> at openclipart.org by <b>Anonymous</b></string>
 </resources>
