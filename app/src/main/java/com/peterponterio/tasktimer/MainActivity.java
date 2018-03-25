@@ -2,7 +2,7 @@ package com.peterponterio.tasktimer;
 
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
