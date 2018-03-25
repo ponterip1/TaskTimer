@@ -3,8 +3,10 @@ package com.peterponterio.tasktimer;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity implements CursorRecyclerViewAdapter.OnTaskClickListener,
@@ -225,6 +228,52 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
 
         TextView tv = (TextView) messageView.findViewById(R.id.about_version);
         tv.setText("v" + BuildConfig.VERSION_NAME); //no need to use a string resource for one letter
+
+
+
+
+
+
+
+
+
+        /*
+            onclick listener set on TextView for URL in "about" page. Used for lower API's that cant
+            open up websites that dont end in .com/.org/ etc
+
+            when textview is tapped, we're creating a new intent. we're using the Intent.ACTION_VIEW
+            as the action. Then we get the text from the textView and converting it into a string and then
+            we're adding that to the intent.setData method. basically formulating the URL
+
+            THIS WILL ONLY BE CALLED ON API's UNDER 20 AND BELOW
+         */
+        TextView about_url = (TextView) messageView.findViewById(R.id.about_url);
+        if(about_url != null) {
+            about_url.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    String s = ((TextView) view).getText().toString();
+                    intent.setData(Uri.parse(s));
+
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(MainActivity.this, "No browser application found, cannot visit world-wide web", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+
+
+
+
+
+
+
+
+
 
         mDialog.show();
     }
