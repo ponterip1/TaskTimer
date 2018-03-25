@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
         args.putLong("TaskId", task.getId());
 
         dialog.setArguments(args);
-        dialog.show(getFragmentManager(), null);
+        dialog.show(getSupportFragmentManager(), null);
     }
 
 
@@ -481,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements CursorRecyclerVie
             args.putInt(AppDialog.DIALOG_NEGATIVE_RID, R.string.cancelEditDiag_negative_caption);
 
             dialog.setArguments(args);
-            dialog.show(getFragmentManager(), null);
+            dialog.show(getSupportFragmentManager(), null);
         }
     }
 
